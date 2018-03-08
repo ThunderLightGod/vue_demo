@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>圣诞主题</title>
+</head>
+
+<body>
+    
+    <div id="app">
+        
+    </div>
+    
+</body>
+<script type="text/javascript">
+let doc = document;
+/**
+ * 针对content中的html文本框
+ * 增加rem的修改
+ * @param  {[type]} doc [description]
+ * @param  {[type]} win [description]
+ * @return {[type]}     [description]
+ */
+let docEl = doc.documentElement,
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+    recalc = function() {
+        //自适应设置容器高度
+        let container = document.querySelector(".container")
+            //原始比例
+        let proportion = 900 / 1440;
+        var clientWidth = docEl.clientWidth;
+        if (!clientWidth) return;
+        docEl.style.fontSize = 20 * (clientWidth / 320) + 'px';
+        docEl.style.fontSize = 20 * (clientWidth / 320) + 'px';
+        container.style.height = container.clientWidth * proportion + "px";
+    };
+window.addEventListener(resizeEvt, recalc, false);
+doc.addEventListener('DOMContentLoaded', recalc, false);
+</script>
+</html>
