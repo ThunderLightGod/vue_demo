@@ -27,14 +27,28 @@
             <figure class="cat"></figure>
             <!-- 小女孩 -->
             <figure ref="girl" class="girl" :class="{'girl-standUp': girlStandUp,'girl-throwBook': girlThrowBook,
-            'girl-walk': girlWalk}"></figure>
+            'girl-walk': girlWalk,'walk-stop': walkStop,'girl-stand': girlStand,'girl-choose': girlChoose}"></figure>
             <figure v-show="christmasBoyHead" class="christmas-boy-head"></figure>
             <figure ref="christmasBoy" class="christmas-boy" :class="{'boy-walk': boyWalk, 'boy-stand': boyStand,
             'boy-unwrapp': boyUnwrapp, 'boy-strip-1': boyStrip1, 'boy-strip-2': boyStrip2, 'boy-strip-3': boyStrip3,
             'boy-hug': boyHug}"> </figure>
+            <div ref="gift" style=" perspective: 1000px;position: absolute;left: 6.1rem;top: 4.8rem;transform: scale3d(.3,.3,.3);">
+              <carouse :spinners="spinners" :show="giftShow" @girlChooseGift="girlChooseGift" ></carouse>
+            </div>
         </section>
         <!-- 第三幅画面 -->
         <section class="page-c bg-adaptive" :class="{'effect-in': pageC}">
+            <!-- 窗户关闭 -->
+            <div class="window wood">
+                <div class="window-content" data-attr="red">
+                    <div ref="windowSceneBg" class="window-scene-bg"></div>
+                    <div ref="windowCloseBg" class="window-close-bg" style="transform:translateZ(0)"></div>
+                    <div class="window-left hover" :class="{'close': windowClose}"></div>
+                    <div class="window-right hover" :class="{'close': windowClose}"></div>
+                </div>
+            </div>
+            <!-- 雪花 -->
+            <snowflake :config="config"></snowflake>
         </section>
     </section>
     <el-select v-model="page" placeholder="">
@@ -47,9 +61,15 @@
 </template>
 
 <script>
+import carouse from 'components/Carouse.vue'
+import snowflake from 'components/SnowFlake.vue'
 export default {
   data () {
     return {
+      config: {
+        clientWidth: 0,
+        clientHeight: 0
+      },
       page: -1,
       index: 0,
       pageA: false,
@@ -62,6 +82,7 @@ export default {
       ],
       boyDeep: true,
       windowOpen: false,
+      windowClose: false,
       boyWalk: true,
       boyStand: false,
       boyUnwrapp: false,
@@ -72,7 +93,38 @@ export default {
       christmasBoyHead: false,
       girlStandUp: false,
       girlThrowBook: false,
-      girlWalk: false
+      girlWalk: false,
+      walkStop: false,
+      girlStand: false,
+      spinners: [{
+        imgUrl: 'http://img.mukewang.com/5662e29a0001905a14410901.png',
+        styleObject: {
+          width: '4rem',
+          transform: 'rotateY(0deg) translateZ(2.5rem)',
+          position: 'absolute'
+        },
+        videoUrl: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
+      },
+      {
+        imgUrl: 'http://img.mukewang.com/5662e2960001f16314410901.png',
+        styleObject: {
+          width: '4rem',
+          transform: 'rotateY(120deg) translateZ(2.5rem) scaleY(.9)',
+          position: 'absolute'
+        },
+        videoUrl: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
+      },
+      {
+        imgUrl: 'http://img.mukewang.com/5662e26f00010dea14410901.png',
+        styleObject: {
+          width: '4rem',
+          transform: 'rotateY(240deg) translateZ(2.5rem) scaleY(.9)',
+          position: 'absolute'
+        },
+        videoUrl: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
+      }],
+      giftShow: false,
+      girlChoose: false
     }
   },
   created () {
@@ -128,12 +180,29 @@ export default {
       this.boyDeep = false
       this.openWindow()
     },
+    girlStopWalk () {
+      this.walkStop = true
+      this.girlStandUp = false
+      this.girlWalk = false
+      this.girlThrowBook = false
+      this.girlStand = true
+    },
     pageCfun () {
-      setTimeout(() => { // 采用箭头函数绑定this
-        this.$nextTick(() => {
-          // this.page = 0
+      return this.transition(this.$refs.windowSceneBg, {
+        time: 3000,
+        style: {
+          opacity: '0'
+        }
+      }).then(() => {
+        return this.transition(this.$refs.windowCloseBg, {
+          time: 5000,
+          style: {
+            opacity: '1'
+          }
         })
-      }, 8000)
+      }).then(() => {
+        this.windowClose = true
+      })
     },
     transition (el, options) {
       return new Promise((resolve, reject) => {
@@ -149,7 +218,8 @@ export default {
     },
     Christmas () {
       // this.pageAfun()
-      this.pageBfun()
+      // this.pageBfun()
+      this.pageCfun()
     },
     boyAction () {
       return this.transition(this.$refs.christmasBoy, {
@@ -173,6 +243,19 @@ export default {
         setTimeout(() => { // 采用箭头函数绑定this
           this.boyStrip1 = true
           this.boyUnwrapp = false
+          this.giftShow = true
+          // 显示礼物界面
+          this.$nextTick(() => {
+            this.transition(this.$refs.gift, {
+              time: 2000,
+              style: {
+                left: '6.8rem',
+                top: '1.5rem',
+                perspective: '500px',
+                transform: 'scale3d(.8,.8,.8)'
+              }
+            })
+          })
         }, 1000)
         setTimeout(() => { // 采用箭头函数绑定this
           this.boyStrip2 = true
@@ -187,7 +270,7 @@ export default {
           this.$refs.christmasBoy.addEventListener('webkitAnimationEnd', () => {
             this.christmasBoyHead = true
           })
-        }, 4000)
+        }, 10000)
       })
     },
     girlAction () {
@@ -198,9 +281,15 @@ export default {
           style: {
             left: '4.5rem'
           }
-        }).then(() => {
         })
+      }).then(() => {
+        return this.girlStopWalk()
+      }).then(() => {
       })
+    },
+    girlChooseGift () {
+      this.girlChoose = true
+      this.walkStop = false
     },
     girlStandUpFun () {
       return new Promise((resolve, reject) => {
@@ -275,6 +364,10 @@ export default {
         })
       }
     }
+  },
+  components: {
+    carouse,
+    snowflake
   }
 }
 </script>
@@ -314,7 +407,7 @@ export default {
         height : 100%;
         background-image: url("http://img.mukewang.com/565d0b280001788014410901.png");
         position: absolute;
-        z-index: 3;
+        z-index: 7;
     }
     /**
     * 页面切换
@@ -978,4 +1071,203 @@ export default {
         background-position: -2000% 100%;
     }
 }
+.page-c {
+    width  : 100%;
+    height : 100%;
+    background-image: url("http://img.mukewang.com/565d0b280001788014410901.png");
+    position: absolute;
+    z-index: 30;
+}
+/**
+ * 窗户
+ */
+
+.window {
+    width: 2.6rem;
+    height: 1.5rem;
+    position: absolute;
+    left: 9.7rem;
+    top: 6.2rem;
+    cursor: pointer;
+    -webkit-perspective: 500px;
+    -moz-perspective: 500px;
+}
+
+.window-content {
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    width: 91%;
+    margin: 0 auto;
+    height: 100%;
+    overflow: hidden;
+}
+
+/**
+ * 窗户背景
+ */
+
+.window-bg {
+    width: 86%;
+    height: 92%;
+    position: absolute;
+    left: 50%;
+    margin-left: -43%;
+    bottom: 0;
+    background: url(http://img.mukewang.com/565d07770001790814410901.png);
+    background-size: 100% 100%;
+    z-index: -1;
+}
+
+/**
+ * 窗户底边
+ * @type {[type]}
+ */
+
+.window:before {
+    content: "";
+    background: url(http://img.mukewang.com/565d07e40001088402410017.png);
+    width: 100%;
+    height: 0.17rem;
+    display: block;
+    position: absolute;
+    bottom: 0.05rem;
+    background-size: 100% 100%;
+    z-index: 100;
+}
+
+/**
+ * 底边阴影
+ * @type {[type]}
+ */
+
+.window:after {
+    content: "";
+    background: url(http://img.mukewang.com/565d080400018d2702270009.png);
+    width: 100%;
+    height: 0.09rem;
+    display: block;
+    position: absolute;
+    bottom: 0;
+    background-size: 100% 100%;
+    z-index: 100;
+}
+
+.wood {
+    display: block;
+    overflow: hidden;
+}
+
+/**
+ * 左侧门
+ */
+
+.window-left {
+    float: left;
+    background: url(http://img.mukewang.com/565d081d0001cfd901140134.png);
+    -webkit-border-top-left-radius: 0.1rem;
+    -moz-border-top-left-radius: 0.1rem;
+}
+
+/**
+ * 右侧门
+ */
+
+.window-right {
+    float: right;
+    background: url(http://img.mukewang.com/565d084c0001431b01140134.png);
+    -webkit-border-top-right-radius: 0.1rem;
+    -moz-border-top-left-radius: 0.1rem;
+}
+
+.window-left,
+.window-right {
+    width: 50%;
+    height: 1.3rem;
+    z-index: 110;
+    box-shadow: 0 0 0.15rem #FCF0BC;
+    background-size: 100% 100%;
+}
+
+.window-left.hover {
+    -webkit-transform: scale(0.95) rotateY(60deg) rotateZ(2deg);
+    -moz-transform: scale(0.95) rotateY(60deg) rotateZ(2deg);
+    margin-top: 0.1rem;
+    margin-left: -0.25rem;
+}
+
+.window-right.hover {
+    -webkit-transform: scale(0.95) rotateY(-60deg) rotateZ(-2deg);
+    -moz-transform: scale(0.95) rotateY(-60deg) rotateZ(-2deg);
+    margin-top: 0.1rem;
+    margin-right: -0.25rem;
+}
+
+/**
+ * 窗户
+ */
+
+.page-c .window {
+    left: 8rem;
+}
+
+.window-left.close,
+.window-right.close {
+    -webkit-animation: closeWindow 2s forwards;
+    -moz-animation: closeWindow 2s forwards;
+}
+
+@-webkit-keyframes closeWindow {
+    100% {
+        -webkit-transform: scale(1) rotateY(0deg) rotateZ(0deg);
+        margin-right: 0;
+        margin-left: 0;
+    }
+}
+
+@-moz-keyframes closeWindow {
+    100% {
+        -moz-transform: scale(1) rotateY(0deg) rotateZ(0deg);
+        margin-right: 0;
+        margin-left: 0;
+    }
+}
+
+/**
+ * 场景背景
+ * @type {[type]}
+ */
+
+.window-scene-bg {
+    background: url(http://img.mukewang.com/565d0b4c0001816b02270135.png);
+    background-size: 100% 100%;
+    width: 2.26rem;
+    height: 1.2rem;
+    position: absolute;
+    left: 50%;
+    bottom: .1rem;
+    z-index: -1;
+    margin-left: -1.13rem;
+    -webkit-transform: translateZ(-50px);
+    -moz-transform: translateZ(-50px);
+}
+
+/**
+ * 关门背景
+ */
+
+.window-close-bg {
+    background: url(http://img.mukewang.com/565d0b3d00016a4600810081.png);
+    background-size: 100% 100%;
+    width: 0.8rem;
+    height: 0.8rem;
+    position: absolute;
+    left: 50%;
+    bottom: .1rem;
+    margin-left: -0.4rem;
+    -webkit-transform: translateZ(-50px);
+    -moz-transform: translateZ(-50px);
+    opacity: 0;
+    z-index: 500;
+}
+
 </style>
