@@ -21,13 +21,13 @@
             </div>
         </section>
         <!-- 第二幅画面 -->
-        <section class="page-b bg-adaptive" :class="{'effect-out': pageB}">
+        <section ref="pageB" class="page-b bg-adaptive" :class="{'effect-out': pageB}">
         <!-- 圣诞男孩 -->
             <!-- 猫 -->
             <figure class="cat"></figure>
             <!-- 小女孩 -->
             <figure ref="girl" class="girl" :class="{'girl-standUp': girlStandUp,'girl-throwBook': girlThrowBook,
-            'girl-walk': girlWalk,'walk-stop': walkStop,'girl-stand': girlStand,'girl-choose': girlChoose}"></figure>
+            'girl-walk': girlWalk,'walk-stop': walkStop,'girl-stand': girlStand,'girl-choose': girlChoose,'girl-weep':girlWeep}"></figure>
             <figure v-show="christmasBoyHead" class="christmas-boy-head"></figure>
             <figure ref="christmasBoy" class="christmas-boy" :class="{'boy-walk': boyWalk, 'boy-stand': boyStand,
             'boy-unwrapp': boyUnwrapp, 'boy-strip-1': boyStrip1, 'boy-strip-2': boyStrip2, 'boy-strip-3': boyStrip3,
@@ -37,7 +37,7 @@
             </div>
         </section>
         <!-- 第三幅画面 -->
-        <section class="page-c bg-adaptive" :class="{'effect-in': pageC}">
+        <section class="page-c bg-adaptive" :class="{'effect-in': pageC}" ref="pageC">
             <!-- 窗户关闭 -->
             <div class="window wood">
                 <div class="window-content" data-attr="red">
@@ -51,12 +51,6 @@
             <snowflake :config="config"></snowflake>
         </section>
     </section>
-    <el-select v-model="page" placeholder="">
-      <el-option v-for="(item, index) in pages" :key="index" :label="item.value" :value="item.key"></el-option>
-    </el-select>
-    <el-button type="primary" @click="playMusic">点击播放音乐</el-button>
-    <el-button type="primary" @click="playMusices">点击播放循环音乐</el-button>
-    <el-button type="primary" @click="playBoy">点击运行雪橇动作</el-button>
 </div>
 </template>
 
@@ -96,210 +90,183 @@ export default {
       girlWalk: false,
       walkStop: false,
       girlStand: false,
+      girlWeep: false,
       spinners: [{
-        imgUrl: 'http://img.mukewang.com/5662e29a0001905a14410901.png',
+        imgUrl: '/static/images/carousel/1.png',
         styleObject: {
           width: '4rem',
           transform: 'rotateY(0deg) translateZ(2.5rem)',
           position: 'absolute'
         },
-        videoUrl: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
+        videoUrl: '/static/images/carousel/1.mp4'
       },
       {
-        imgUrl: 'http://img.mukewang.com/5662e2960001f16314410901.png',
+        imgUrl: '/static/images/carousel/2.png',
         styleObject: {
           width: '4rem',
           transform: 'rotateY(120deg) translateZ(2.5rem) scaleY(.9)',
           position: 'absolute'
         },
-        videoUrl: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
+        videoUrl: '/static/images/carousel/2.mp4'
       },
       {
-        imgUrl: 'http://img.mukewang.com/5662e26f00010dea14410901.png',
+        imgUrl: '/static/images/carousel/3.png',
         styleObject: {
           width: '4rem',
           transform: 'rotateY(240deg) translateZ(2.5rem) scaleY(.9)',
           position: 'absolute'
         },
-        videoUrl: 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4'
+        videoUrl: '/static/images/carousel/3.mp4'
       }],
       giftShow: false,
       girlChoose: false
     }
   },
-  created () {
-  },
   methods: {
-    pageAfun () {
-      return this.transition(this.$refs.boy, {
+    Christmas () {
+      this.pageAfun().then(() => {
+        this.pageBfun()
+      })
+      // this.pageCfun()
+    },
+    async pageAfun () {
+      await this.transition(this.$refs.boy, {
         time: 10000,
         style: {
           top: '4rem',
           right: '16rem',
           scale: '1.2'
         }
-      }).then(() => {
-        return this.transition(this.$refs.boy, {
-          time: 500,
-          style: {
-            rotateY: '-180',
-            scale: '1.5'
-          }
-        })
-      }).catch(() => {
-        console.log(console)
-      }).then(() => {
-        return this.transition(this.$refs.boy, {
-          time: 7000,
-          style: {
-            top: '7.8rem',
-            right: '1.2rem'
-          }
-        })
-      }).catch(() => {
-        console.log(console)
-      }).finally(() => {
-        this.stopWalk()
       })
-      // setTimeout(() => { // 采用箭头函数绑定this
-      //   this.$nextTick(() => {
-      //     // this.page = 1
-      //   })
-      // }, 8000)
-    },
-    pageBfun () {
-      this.boyAction()
-      this.girlAction()
-      setTimeout(() => { // 采用箭头函数绑定this
-        this.$nextTick(() => {
-          // this.page = 2
-        })
-      }, 8000)
-    },
-    stopWalk () {
+      await this.transition(this.$refs.boy, {
+        time: 500,
+        style: {
+          rotateY: '-180',
+          scale: '1.5'
+        }
+      })
+      await this.transition(this.$refs.boy, {
+        time: 7000,
+        style: {
+          top: '7.8rem',
+          right: '1.2rem'
+        }
+      })
+      // await this.stopWalk()
       this.boyDeep = false
-      this.openWindow()
+      this.windowOpen = true
     },
-    girlStopWalk () {
+    async pageBfun () {
+      this.$refs.pageB.style.zIndex = '6'
+      await Promise.all([this.boyAction(), this.girlAction()])
+    },
+    async pageCfun () {
+      this.$refs.pageC.style.zIndex = '7'
+      this.windowAuto(this.$refs.pageC)
+      this.$children[1].Snowflake()
+      await this.transition(this.$refs.windowSceneBg, {
+        time: 2000,
+        style: {
+          opacity: '0'
+        }
+      })
+      await this.transition(this.$refs.windowCloseBg, {
+        time: 2000,
+        style: {
+          opacity: '1'
+        }
+      })
+      this.windowClose = true
+    },
+    async boyAction () {
+      await this.transition(this.$refs.christmasBoy, {
+        time: 4000,
+        style: {
+          right: '4.5rem'
+        }
+      })
+      // 停止走路
+      this.boyWalk = false
+      this.boyStand = true
+      // 解开包裹
+      this.boyUnwrapp = true
+      this.boyStand = false
+      this.$refs.christmasBoy.addEventListener('webkitAnimationEnd', () => {
+        return Promise.resolve()
+      })
+      // 脱衣动作
+      await this.sleep(1000)
+      this.boyStrip1 = true
+      this.boyUnwrapp = false
+      this.giftShow = true
+      // 显示礼物界面
+      await this.transition(this.$refs.gift, {
+        time: 2000,
+        style: {
+          left: '6.8rem',
+          top: '1.5rem',
+          perspective: '500px',
+          transform: 'scale3d(.8,.8,.8)'
+        }
+      })
+      await this.sleep(1000)
+      this.boyStrip2 = true
+      this.boyUnwrapp = false
+      await this.sleep(1000)
+      this.boyStrip3 = true
+      this.boyUnwrapp = false
+      // 拥抱
+      await this.sleep(5000)
+      this.boyHug = true
+      this.$refs.christmasBoy.addEventListener('webkitAnimationEnd', () => {
+        this.christmasBoyHead = true
+      })
+    },
+    async girlAction () {
+      await this.sleep(200)
+      this.girlStandUp = true
+      await this.sleep(300)
+      this.girlThrowBook = true
+      this.girlWalk = true
+      await this.transition(this.$refs.girl, {
+        time: 4000,
+        style: {
+          left: '4.5rem'
+        }
+      })
+      // 女孩走路
       this.walkStop = true
       this.girlStandUp = false
       this.girlWalk = false
       this.girlThrowBook = false
       this.girlStand = true
+      // 选择礼物动作
+      this.girlChoose = true
     },
-    pageCfun () {
-      return this.transition(this.$refs.windowSceneBg, {
-        time: 3000,
-        style: {
-          opacity: '0'
-        }
-      }).then(() => {
-        return this.transition(this.$refs.windowCloseBg, {
-          time: 5000,
-          style: {
-            opacity: '1'
-          }
-        })
-      }).then(() => {
-        this.windowClose = true
+    girlChooseGift () {
+      this.walkStop = false
+    },
+    windowAuto (el) {
+      debugger
+      this.config.clientWidth = el.clientWidth
+      this.config.clientHeight = el.clientHeight
+      const that = this
+      window.onresize = () => {
+        debugger
+        that.config.clientWidth = el.clientWidth
+        that.config.clientHeight = el.clientHeight
+      }
+    },
+    sleep (time) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve()
+        }, time)
       })
     },
     transition (el, options) {
       return new Promise((resolve, reject) => {
         resolve(window.Velocity(el, options.style, options.time))
-      })
-    },
-    playBoy () {
-      this.Christmas()
-    },
-    run () {},
-    openWindow () {
-      this.windowOpen = true
-    },
-    Christmas () {
-      // this.pageAfun()
-      // this.pageBfun()
-      this.pageCfun()
-    },
-    boyAction () {
-      return this.transition(this.$refs.christmasBoy, {
-        time: 4000,
-        style: {
-          right: '4.5rem'
-        }
-      }).then(() => {
-        // 停止走路
-        this.boyWalk = false
-        this.boyStand = true
-      }).then(() => {
-        // 解开包裹
-        this.boyUnwrapp = true
-        this.boyStand = false
-        return this.$refs.christmasBoy.addEventListener('webkitAnimationEnd', () => {
-          return Promise.resolve()
-        })
-      }).then(() => {
-        // 脱衣动作
-        setTimeout(() => { // 采用箭头函数绑定this
-          this.boyStrip1 = true
-          this.boyUnwrapp = false
-          this.giftShow = true
-          // 显示礼物界面
-          this.$nextTick(() => {
-            this.transition(this.$refs.gift, {
-              time: 2000,
-              style: {
-                left: '6.8rem',
-                top: '1.5rem',
-                perspective: '500px',
-                transform: 'scale3d(.8,.8,.8)'
-              }
-            })
-          })
-        }, 1000)
-        setTimeout(() => { // 采用箭头函数绑定this
-          this.boyStrip2 = true
-          this.boyUnwrapp = false
-        }, 2000)
-        setTimeout(() => { // 采用箭头函数绑定this
-          this.boyStrip3 = true
-          this.boyUnwrapp = false
-        }, 3000)
-        setTimeout(() => { // 采用箭头函数绑定this
-          this.boyHug = true
-          this.$refs.christmasBoy.addEventListener('webkitAnimationEnd', () => {
-            this.christmasBoyHead = true
-          })
-        }, 10000)
-      })
-    },
-    girlAction () {
-      this.girlStandUpFun().then(() => {
-        this.girlWalk = true
-        return this.transition(this.$refs.girl, {
-          time: 4000,
-          style: {
-            left: '4.5rem'
-          }
-        })
-      }).then(() => {
-        return this.girlStopWalk()
-      }).then(() => {
-      })
-    },
-    girlChooseGift () {
-      this.girlChoose = true
-      this.walkStop = false
-    },
-    girlStandUpFun () {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => { // 采用箭头函数绑定this
-          this.girlStandUp = true
-        }, 200)
-        setTimeout(() => { // 采用箭头函数绑定this
-          this.girlThrowBook = true
-          resolve()
-        }, 500)
       })
     },
     HTML5Audio (url, loop) {
@@ -317,44 +284,22 @@ export default {
     },
     playMusic () {
       // 背景音乐
-      let audio1 = this.HTML5Audio('http://www.tingge123.com/mp3/2017-07-20/1500565663.mp3')
+      let audio1 = this.HTML5Audio('/static/music/scene.mp3')
       audio1.end(function () {
         alert('音乐结束')
       })
     },
     playMusices () {
-      let audio1 = this.HTML5Audio('http://www.tingge123.com/mp3/2017-07-20/1500565663.mp3')
+      let audio1 = this.HTML5Audio('/static/music/scene.mp3')
       audio1.end(() => {
-        this.Html5Audio('http://www.tingge123.com/mp3/2017-07-20/1500565663.mp3', true)
+        this.Html5Audio('/static/music/scene.mp3', true)
       })
     }
   },
   mounted () {
-    // this.$nextTick(() => {
-    //   this.page = 0
-    // })
+    this.Christmas()
   },
   watch: {
-    'page': function () {
-      // this.$refs.pageList.children[this.page].style.zIndex = ++this.index
-      // switch (this.page) {
-      //   case 0:
-      //     this.pageA = false
-      //     this.pageB = false
-      //     this.pageC = false
-      //     this.pageAfun()
-      //     break
-      //   case 1:
-      //     this.pageA = true
-      //     this.pageBfun()
-      //     break
-      //   case 2:
-      //     this.pageB = true
-      //     this.pageC = true
-      //     this.pageCfun()
-      //     break
-      // }
-    },
     'windowOpen': function () {
       if (this.windowOpen) {
         this.$refs.windowleft.addEventListener('transitionend webkitTransitionEnd', () => {
@@ -362,6 +307,11 @@ export default {
             this.windowOpen = false
           })
         })
+      }
+    },
+    'walkStop': function () {
+      if (!this.walkStop) {
+        this.pageCfun()
       }
     }
   },
@@ -373,358 +323,369 @@ export default {
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
-    *{
-        margin: 0;
-        padding: 0;
-    }
+*{
+    margin: 0;
+    padding: 0;
+}
 
-    .container {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-    }
+.container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
 
-    .bg-adaptive {
-        background-size: 100% 100%;
+.bg-adaptive {
+    background-size: 100% 100%;
+}
+.container .page-a {
+    width  : 100%;
+    height : 100%;
+    background-image: url("/static/images/a/page-a-bg.png");
+    position: absolute;
+    z-index: 5;
+}
+.container .page-b {
+    width  : 100%;
+    height : 100%;
+    background-image: url("/static/images/b/page-b-bg.png");
+    position: absolute;
+    z-index: 4;
+}
+.page-c {
+    width  : 100%;
+    height : 100%;
+    background-image: url("/static/images/c/page-c-bg.png");
+    position: absolute;
+    z-index: 3;
+}
+/**
+* 页面切换
+* 镜头方法
+*/
+.effect-out{
+    -webkit-animation: effectOut 8s ease-in-out forwards;
+    -webkit-transform-origin:71% 72%;
+    -moz-animation: effectOut 8s ease-in-out forwards;
+    -moz-transform-origin:71% 72%;
+}
+@-webkit-keyframes effectOut{
+    0% { opacity:1; }
+    100% { -webkit-transform: scale(20); opacity:0; }
+}
+@-moz-keyframes effectOut{
+    0% { opacity:1; }
+    100% { -moz-transform: scale(20); opacity:0; }
+}
+.effect-in{
+    z-index: 15;
+    display: block;
+    opacity:0;
+    -webkit-transform: scale(8);
+    -webkit-animation: effectIn 5s ease-in-out forwards;
+    -webkit-transform-origin:58.5% 73.5%;
+    -moz-transform: scale(8);
+    -moz-animation: effectIn 5s ease-in-out forwards;
+    -moz-transform-origin:58.5% 73.5%;
+}
+@-webkit-keyframes effectIn{
+    100% { -webkit-transform: scale(1); opacity:1; }
+}
+@-moz-keyframes effectIn{
+    100% { -moz-transform: scale(1); opacity:1; }
+}
+/**
+* 圣诞树
+* animation: name duration timing-function delay iteration-count direction;
+*/
+.tree {
+    width: 2.71rem;
+    height: 4.24rem;
+    z-index: 15;
+    position: absolute;
+    bottom: 0;
+    left: 1rem;
+    background-image: url('/static/images/a/trees.png');
+    background-size: 200% 100%;
+    -webkit-animation: treeAnim 1s steps(2) infinite;
+    -moz-animation: treeAnim 1s steps(2) infinite;
+}
+@-webkit-keyframes treeAnim {
+    0% {
+        background-position: 0% 100%;
     }
-    .container .page-a {
-        width  : 100%;
-        height : 100%;
-        background-image: url("http://img.mukewang.com/565d07770001790814410901.png");
-        position: absolute;
-        z-index: 5;
+    100% {
+        background-position: -200% 100%;
     }
-    .container .page-b {
-        width  : 100%;
-        height : 100%;
-        background-image: url("http://img.mukewang.com/565d09fa000145a614410901.png");
-        position: absolute;
-        z-index: 6;
+}
+@-moz-keyframes treeAnim {
+    0% {
+        background-position: 0% 100%;
     }
-    .page-c {
-        width  : 100%;
-        height : 100%;
-        background-image: url("http://img.mukewang.com/565d0b280001788014410901.png");
-        position: absolute;
-        z-index: 7;
+    100% {
+        background-position: -200% 100%;
     }
-    /**
-    * 页面切换
-    * 镜头方法
-    */
-    .effect-out{
-        -webkit-animation: effectOut 8s ease-in-out forwards;
-        -webkit-transform-origin:71% 72%;
-        -moz-animation: effectOut 8s ease-in-out forwards;
-        -moz-transform-origin:71% 72%;
+}
+/*月亮*/
+.moon {
+    background: #FCF0BC;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    box-shadow: 0 0 1.5rem #FCF0BC;
+    position: absolute;
+    left: 3.3rem;
+    top: .8rem;
+    -webkit-animation: nucleus 2s infinite linear;
+    -moz-animation: nucleus 2s infinite linear;
+}
+/**
+* 光晕效果
+*/
+@-webkit-keyframes nucleus {
+    0% {
+        box-shadow: 0 0 0 transparent;
     }
-    @-webkit-keyframes effectOut{
-        0% { opacity:1; }
-        100% { -webkit-transform: scale(20); opacity:0; }
+    50% {
+        box-shadow: 0 0 1rem #FCF0BC;
     }
-    @-moz-keyframes effectOut{
-        0% { opacity:1; }
-        100% { -moz-transform: scale(20); opacity:0; }
+    100% {
+        box-shadow: 0 0 0 transparent;
     }
-    .effect-in{
-        z-index: 15;
-        display: block;
-        opacity:0;
-        -webkit-transform: scale(8);
-        -webkit-animation: effectIn 5s ease-in-out forwards;
-        -webkit-transform-origin:58.5% 73.5%;
-        -moz-transform: scale(8);
-        -moz-animation: effectIn 5s ease-in-out forwards;
-        -moz-transform-origin:58.5% 73.5%;
+}
+@-moz-keyframes nucleus {
+    0% {
+        box-shadow: 0 0 0 transparent;
     }
-    @-webkit-keyframes effectIn{
-        100% { -webkit-transform: scale(1); opacity:1; }
+    50% {
+        box-shadow: 0 0 1rem #FCF0BC;
     }
-    @-moz-keyframes effectIn{
-        100% { -moz-transform: scale(1); opacity:1; }
+    100% {
+        box-shadow: 0 0 0 transparent;
     }
-    /**
-    * 圣诞树
-    * animation: name duration timing-function delay iteration-count direction;
-    */
-    .tree {
-        width: 2.71rem;
-        height: 4.24rem;
-        z-index: 15;
-        position: absolute;
-        bottom: 0;
-        left: 1rem;
-        background-image: url(http://img.mukewang.com/565d07d30001c97605420424.png);
-        background-size: 200% 100%;
-        -webkit-animation: treeAnim 1s steps(2) infinite;
-        -moz-animation: treeAnim 1s steps(2) infinite;
+}
+/*云*/
+.cloudy {
+    background: #60768D;
+    border-radius: 50%;
+    box-shadow: #60768D 1.2rem -0.2rem 0 -0.1rem, #60768D 0.5rem -0.5rem, #60768D 0.8rem 0.2rem,#60768D 1.5rem 0.2rem 0 -0.2rem;
+    height: 1rem;
+    width: 1rem;
+    position: absolute;
+    left: .5rem;
+    top: 1.8rem;
+    z-index: 5;
+    -webkit-animation: cloudy 5s ease-in-out infinite;
+    -moz-animation: cloudy 5s ease-in-out infinite;
+}
+@-webkit-keyframes cloudy {
+    50% {
+        -webkit-transform: translateY(-0.1rem);
     }
-    @-webkit-keyframes treeAnim {
-        0% {
-            background-position: 0% 100%;
-        }
-        100% {
-            background-position: -200% 100%;
-        }
+}
+@-moz-keyframes cloudy {
+    50% {
+        -moz-transform: translateY(-0.1rem);
     }
-    @-moz-keyframes treeAnim {
-        0% {
-            background-position: 0% 100%;
-        }
-        100% {
-            background-position: -200% 100%;
-        }
-    }
-    /*月亮*/
-    .moon {
-        background: #FCF0BC;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 50%;
-        box-shadow: 0 0 1.5rem #FCF0BC;
-        position: absolute;
-        left: 3.3rem;
-        top: .8rem;
-        -webkit-animation: nucleus 2s infinite linear;
-        -moz-animation: nucleus 2s infinite linear;
-    }
-    /**
-    * 光晕效果
-    */
-    @-webkit-keyframes nucleus {
-        0% {
-            box-shadow: 0 0 0 transparent;
-        }
-        50% {
-            box-shadow: 0 0 1rem #FCF0BC;
-        }
-        100% {
-            box-shadow: 0 0 0 transparent;
-        }
-    }
-    @-moz-keyframes nucleus {
-        0% {
-            box-shadow: 0 0 0 transparent;
-        }
-        50% {
-            box-shadow: 0 0 1rem #FCF0BC;
-        }
-        100% {
-            box-shadow: 0 0 0 transparent;
-        }
-    }
-    /*云*/
-    .cloudy {
-        background: #60768D;
-        border-radius: 50%;
-        box-shadow: #60768D 1.2rem -0.2rem 0 -0.1rem, #60768D 0.5rem -0.5rem, #60768D 0.8rem 0.2rem,#60768D 1.5rem 0.2rem 0 -0.2rem;
-        height: 1rem;
-        width: 1rem;
-        position: absolute;
-        left: .5rem;
-        top: 1.8rem;
-        z-index: 5;
-        -webkit-animation: cloudy 5s ease-in-out infinite;
-        -moz-animation: cloudy 5s ease-in-out infinite;
-    }
-    @-webkit-keyframes cloudy {
-        50% {
-            -webkit-transform: translateY(-0.1rem);
-        }
-    }
-    @-moz-keyframes cloudy {
-        50% {
-            -moz-transform: translateY(-0.1rem);
-        }
-    }
-    /**
-    * 圣诞男孩
-    */
+}
+/**
+* 圣诞男孩
+*/
 
-    .chs-boy {
-        width           : 5rem;
-        height          : 1.5rem;
-        position        : absolute;
-        z-index         : 3;
-        top             : .1rem;
-        right           : -3rem;
-        transform       : scale(0.1);
-        background      : url(http://img.mukewang.com/565d07490001365329660269.png) -300% -100%;
-        background-size : 400% 100%;
+.chs-boy {
+    width           : 5rem;
+    height          : 1.5rem;
+    position        : absolute;
+    z-index         : 3;
+    top             : .1rem;
+    right           : -3rem;
+    transform       : scale(0.1);
+    background      : url('/static/images/a/boy-sleigh-car.png') -300% -100%;
+    background-size : 400% 100%;
+}
+
+/**
+* 男孩走路动作
+*/
+
+.chs-boy-deer {
+    -webkit-animation:chsBoyDeer 0.75s steps(3,end) infinite;
+    -moz-animation:chsBoyDeer 0.75s steps(3,end) infinite;
+}
+
+@-webkit-keyframes chsBoyDeer {
+    0% {
+        background-position: -0% 100%;
     }
-
-    /**
-    * 男孩走路动作
-    */
-
-    .chs-boy-deer {
-        -webkit-animation:chsBoyDeer 0.75s steps(3,end) infinite;
-        -moz-animation:chsBoyDeer 0.75s steps(3,end) infinite;
+    100% {
+        background-position: -300% 100%;
     }
-
-    @-webkit-keyframes chsBoyDeer {
-        0% {
-            background-position: -0% 100%;
-        }
-        100% {
-            background-position: -300% 100%;
-        }
+}
+@-moz-keyframes chsBoyDeer {
+    0% {
+        background-position: -0% 100%;
     }
-    @-moz-keyframes chsBoyDeer {
-        0% {
-            background-position: -0% 100%;
-        }
-        100% {
-            background-position: -300% 100%;
-        }
+    100% {
+        background-position: -300% 100%;
     }
+}
 
-    /**
-    * 人物停止
-    */
+/**
+* 人物停止
+*/
 
-    .boy-stop-animate {
-        -webkit-animation-play-state: paused;
-    }
+.boy-stop-animate {
+    -webkit-animation-play-state: paused;
+}
 
-    /**
-    * 窗户
-    */
+/**
+ * 窗户
+ */
 
-    .window {
-        width: 2.6rem;
-        height: 1.5rem;
-        position: absolute;
-        left: 9.7rem;
-        top: 6.2rem;
-        cursor: pointer;
-        -webkit-perspective: 500px;
-        -moz-perspective: 500px;
-    }
+.window {
+    width: 2.6rem;
+    height: 1.5rem;
+    position: absolute;
+    left: 9.7rem;
+    top: 6.2rem;
+    cursor: pointer;
+    -webkit-perspective: 500px;
+    -moz-perspective: 500px;
+}
 
-    .window-content {
-        -webkit-transform-style: preserve-3d;
-        -moz-transform-style: preserve-3d;
-        width: 91%;
-        margin: 0 auto;
-        height: 100%;
-        overflow: hidden;
-    }
+/**
+ * 窗户背景
+ */
 
-    /**
-    * 窗户背景
-    */
+.window-bg {
+    width: 86%;
+    height: 92%;
+    position: absolute;
+    left: 50%;
+    margin-left: -43%;
+    bottom: 0;
+    background: url('/static/images/a/page-a-window-bg.png');
+    background-size: 100% 100%;
+    z-index: -1;
+}
 
-    .window-bg {
-        width: 86%;
-        height: 92%;
-        position: absolute;
-        left: 50%;
-        margin-left: -43%;
-        bottom: 0;
-        background: url(http://img.mukewang.com/565d07770001790814410901.png);
-        background-size: 100% 100%;
-        z-index: -1;
-    }
+/**
+ * 窗户底边
+ * @type {[type]}
+ */
 
-    /**
-    * 窗户底边
-    * @type {[type]}
-    */
+.window:before {
+    content: "";
+    background: url('/static/images/a/window-bottom.png');
+    width: 100%;
+    height: 0.17rem;
+    display: block;
+    position: absolute;
+    bottom: 0.05rem;
+    background-size: 100% 100%;
+    z-index: 100;
+}
 
-    .window:before {
-        content: "";
-        background: url(http://img.mukewang.com/565d07e40001088402410017.png);
-        width: 100%;
-        height: 0.17rem;
-        display: block;
-        position: absolute;
-        bottom: 0.05rem;
-        background-size: 100% 100%;
-        z-index: 100;
-    }
+/**
+ * 底边阴影
+ * @type {[type]}
+ */
 
-    /**
-    * 底边阴影
-    * @type {[type]}
-    */
+.window:after {
+    content: "";
+    background: url('/static/images/a/window-bottom-shadow.png');
+    width: 100%;
+    height: 0.09rem;
+    display: block;
+    position: absolute;
+    bottom: 0;
+    background-size: 100% 100%;
+    z-index: 100;
+}
 
-    .window:after {
-        content: "";
-        background: url(http://img.mukewang.com/565d080400018d2702270009.png);
-        width: 100%;
-        height: 0.09rem;
-        display: block;
-        position: absolute;
-        bottom: 0;
-        background-size: 100% 100%;
-        z-index: 100;
-    }
+.wood {
+    display: block;
+    overflow: hidden;
+}
 
-    .wood {
-        display: block;
-        overflow: hidden;
-    }
+.window {
+    width: 2.6rem;
+    height: 1.5rem;
+    position: absolute;
+    left: 9.7rem;
+    top: 6.2rem;
+    cursor: pointer;
+    -webkit-perspective: 500px;
+    -moz-perspective: 500px;
+}
 
-    /**
-    * 左侧门
-    */
+.window-content {
+    -webkit-transform-style: preserve-3d;
+    -moz-transform-style: preserve-3d;
+    width: 91%;
+    margin: 0 auto;
+    height: 100%;
+    overflow: hidden;
+}
 
-    .window-left {
-        float: left;
-        background: url(http://img.mukewang.com/565d081d0001cfd901140134.png);
-        -webkit-border-top-left-radius: 0.1rem;
-        -moz-border-top-left-radius: 0.1rem;
-    }
+/**
+* 左侧门
+*/
 
-    /**
-    * 右侧门
-    */
+.window-left {
+    float: left;
+    background: url('/static/images/a/window-left.png');
+    -webkit-border-top-left-radius: 0.1rem;
+    -moz-border-top-left-radius: 0.1rem;
+}
 
-    .window-right {
-        float: right;
-        background: url(http://img.mukewang.com/565d084c0001431b01140134.png);
-        -webkit-border-top-right-radius: 0.1rem;
-        -moz-border-top-left-radius: 0.1rem;
-    }
+/**
+* 右侧门
+*/
 
-    .window-left,
-    .window-right {
-        width: 1.17rem;
-        height: 1.3rem;
-        z-index: 110;
-        box-shadow: 0 0 0.15rem #FCF0BC;
-        background-size: 100% 100%;
-    }
+.window-right {
+    float: right;
+    background: url('/static/images/a/window-right.png');
+    -webkit-border-top-right-radius: 0.1rem;
+    -moz-border-top-left-radius: 0.1rem;
+}
 
-    .window-animation {
-        -webkit-transition: 2s ease-in-out;
-        -moz-transition: 2s ease-in-out;
-    }
+.window-left,
+.window-right {
+    width: 1.17rem;
+    height: 1.3rem;
+    z-index: 110;
+    box-shadow: 0 0 0.15rem #FCF0BC;
+    background-size: 100% 100%;
+}
 
-    /**
-    * 动画过程
-    */
+.window-animation {
+    -webkit-transition: 2s ease-in-out;
+    -moz-transition: 2s ease-in-out;
+}
 
-    .window-transition {
-        -webkit-transition: 2s ease-in-out;
-        -moz-transition: 2s ease-in-out;
-    }
+/**
+* 动画过程
+*/
 
-    .window-left.hover {
-    -webkit-transform: scale(0.95) rotateY(60deg);
-        -moz-transform: scale(0.95) rotateY(60deg);
-        margin-top: 0.1rem;
-        margin-left: -0.25rem;
-    }
+.window-transition {
+    -webkit-transition: 2s ease-in-out;
+    -moz-transition: 2s ease-in-out;
+}
 
-    .window-right.hover {
-    -webkit-transform: scale(0.95) rotateY(-60deg);
-        -moz-transform: scale(0.95) rotateY(-60deg);
-        margin-top: 0.1rem;
-        margin-right: -0.25rem;
-    }
+.window-left.hover {
+-webkit-transform: scale(0.95) rotateY(60deg);
+    -moz-transform: scale(0.95) rotateY(60deg);
+    margin-top: 0.1rem;
+    margin-left: -0.25rem;
+}
+
+.window-right.hover {
+-webkit-transform: scale(0.95) rotateY(-60deg);
+    -moz-transform: scale(0.95) rotateY(-60deg);
+    margin-top: 0.1rem;
+    margin-right: -0.25rem;
+}
 /********************************************************
   小男孩动作
 **********************************************************/
@@ -750,7 +711,7 @@ export default {
     z-index: 5;
     right: -3.5rem;
     top: 4rem;
-    background: url(http://img.mukewang.com/565d09870001372152510407.png);
+    background: url('/static/images/b/boy.png');
     background-size: 1500% 100%;
     background-position: 0% 100%;
 }
@@ -870,7 +831,7 @@ export default {
     height: 4.06rem;
     position: absolute;
     z-index: 12;
-    background: url(http://img.mukewang.com/565d09870001372152510407.png);
+    background: url('/static/images/b/boy.png');
     background-size: 1400% 100%;
     background-position: -1300% 100%;
     /* display: none; */
@@ -889,7 +850,7 @@ export default {
     z-index: 10;
     left: 1rem;
     top: 3.2rem;
-    background: url(http://img.mukewang.com/565d09e50001156273510407.png);
+    background: url('/static/images/b/girl.png');
     background-size: 2100% 100%;
 }
 
@@ -1071,140 +1032,6 @@ export default {
         background-position: -2000% 100%;
     }
 }
-.page-c {
-    width  : 100%;
-    height : 100%;
-    background-image: url("http://img.mukewang.com/565d0b280001788014410901.png");
-    position: absolute;
-    z-index: 30;
-}
-/**
- * 窗户
- */
-
-.window {
-    width: 2.6rem;
-    height: 1.5rem;
-    position: absolute;
-    left: 9.7rem;
-    top: 6.2rem;
-    cursor: pointer;
-    -webkit-perspective: 500px;
-    -moz-perspective: 500px;
-}
-
-.window-content {
-    -webkit-transform-style: preserve-3d;
-    -moz-transform-style: preserve-3d;
-    width: 91%;
-    margin: 0 auto;
-    height: 100%;
-    overflow: hidden;
-}
-
-/**
- * 窗户背景
- */
-
-.window-bg {
-    width: 86%;
-    height: 92%;
-    position: absolute;
-    left: 50%;
-    margin-left: -43%;
-    bottom: 0;
-    background: url(http://img.mukewang.com/565d07770001790814410901.png);
-    background-size: 100% 100%;
-    z-index: -1;
-}
-
-/**
- * 窗户底边
- * @type {[type]}
- */
-
-.window:before {
-    content: "";
-    background: url(http://img.mukewang.com/565d07e40001088402410017.png);
-    width: 100%;
-    height: 0.17rem;
-    display: block;
-    position: absolute;
-    bottom: 0.05rem;
-    background-size: 100% 100%;
-    z-index: 100;
-}
-
-/**
- * 底边阴影
- * @type {[type]}
- */
-
-.window:after {
-    content: "";
-    background: url(http://img.mukewang.com/565d080400018d2702270009.png);
-    width: 100%;
-    height: 0.09rem;
-    display: block;
-    position: absolute;
-    bottom: 0;
-    background-size: 100% 100%;
-    z-index: 100;
-}
-
-.wood {
-    display: block;
-    overflow: hidden;
-}
-
-/**
- * 左侧门
- */
-
-.window-left {
-    float: left;
-    background: url(http://img.mukewang.com/565d081d0001cfd901140134.png);
-    -webkit-border-top-left-radius: 0.1rem;
-    -moz-border-top-left-radius: 0.1rem;
-}
-
-/**
- * 右侧门
- */
-
-.window-right {
-    float: right;
-    background: url(http://img.mukewang.com/565d084c0001431b01140134.png);
-    -webkit-border-top-right-radius: 0.1rem;
-    -moz-border-top-left-radius: 0.1rem;
-}
-
-.window-left,
-.window-right {
-    width: 50%;
-    height: 1.3rem;
-    z-index: 110;
-    box-shadow: 0 0 0.15rem #FCF0BC;
-    background-size: 100% 100%;
-}
-
-.window-left.hover {
-    -webkit-transform: scale(0.95) rotateY(60deg) rotateZ(2deg);
-    -moz-transform: scale(0.95) rotateY(60deg) rotateZ(2deg);
-    margin-top: 0.1rem;
-    margin-left: -0.25rem;
-}
-
-.window-right.hover {
-    -webkit-transform: scale(0.95) rotateY(-60deg) rotateZ(-2deg);
-    -moz-transform: scale(0.95) rotateY(-60deg) rotateZ(-2deg);
-    margin-top: 0.1rem;
-    margin-right: -0.25rem;
-}
-
-/**
- * 窗户
- */
 
 .page-c .window {
     left: 8rem;
@@ -1238,7 +1065,7 @@ export default {
  */
 
 .window-scene-bg {
-    background: url(http://img.mukewang.com/565d0b4c0001816b02270135.png);
+    background: url('/static/images/c/window-scene-bg.png');
     background-size: 100% 100%;
     width: 2.26rem;
     height: 1.2rem;
@@ -1256,7 +1083,7 @@ export default {
  */
 
 .window-close-bg {
-    background: url(http://img.mukewang.com/565d0b3d00016a4600810081.png);
+    background: url('/static/images/c/window-close-bg.png');
     background-size: 100% 100%;
     width: 0.8rem;
     height: 0.8rem;

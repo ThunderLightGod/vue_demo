@@ -22,6 +22,7 @@ let doc = document;
  * @param  {[type]} win [description]
  * @return {[type]}     [description]
  */
+config = {};
 let docEl = doc.documentElement,
     resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
     recalc = function() {
@@ -34,6 +35,9 @@ let docEl = doc.documentElement,
         docEl.style.fontSize = 20 * (clientWidth / 320) + 'px';
         docEl.style.fontSize = 20 * (clientWidth / 320) + 'px';
         container.style.height = container.clientWidth * proportion + "px";
+        //宽与高度
+        document.body.style.height = clientWidth * (900 / 1440) + "px"
+        
     };
 window.addEventListener(resizeEvt, recalc, false);
 doc.addEventListener('DOMContentLoaded', recalc, false);
