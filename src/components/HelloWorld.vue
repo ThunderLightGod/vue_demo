@@ -345,8 +345,9 @@ export default {
     },
     playMusices () {
       let audio1 = this.HTML5Audio('/static/music/scene.mp3')
+      let that = this
       audio1.end(() => {
-        this.Html5Audio('/static/music/scene.mp3', true)
+        that.Html5Audio('/static/music/scene.mp3', true)
       })
     }
   },
