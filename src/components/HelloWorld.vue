@@ -243,7 +243,6 @@ export default {
       await this.sleep(2500)
       // 麋鹿
       this.deerCar = true
-      debugger
       await this.transition(this.$refs.deer, {
         time: 6000,
         style: {
