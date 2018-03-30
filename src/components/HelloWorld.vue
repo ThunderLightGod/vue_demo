@@ -328,27 +328,13 @@ export default {
       audio.autoplay = true
       audio.loop = loop || false // 是否循环
       audio.play()
-      return {
-        end: function (callback) {
-          audio.addEventListener('ended', function () { // 侦听音乐结束
-            callback()
-          }, false)
-        }
-      }
     },
     playMusic () {
       // 背景音乐
-      let audio1 = this.HTML5Audio('/static/music/scene.mp3')
-      audio1.end(function () {
-        alert('音乐结束')
-      })
+      this.HTML5Audio('/static/music/scene.mp3')
     },
     playMusices () {
-      let audio1 = this.HTML5Audio('/static/music/scene.mp3')
-      let that = this
-      audio1.end(() => {
-        that.Html5Audio('/static/music/scene.mp3', true)
-      })
+      this.Html5Audio('/static/music/scene.mp3', true)
     }
   },
   mounted () {
