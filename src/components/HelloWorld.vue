@@ -334,7 +334,8 @@ export default {
       this.HTML5Audio('/static/music/scene.mp3')
     },
     playMusices () {
-      this.Html5Audio('/static/music/scene.mp3', true)
+      debugger
+      this.HTML5Audio('/static/music/scene.mp3', true)
     }
   },
   mounted () {
