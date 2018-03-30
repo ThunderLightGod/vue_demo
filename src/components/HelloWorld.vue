@@ -27,15 +27,14 @@
             <figure class="cat" :class="{'cat-book': catBook}"></figure>
             <!-- 小女孩 -->
             <figure ref="girl" class="girl" :class="{'girl-standUp': girlStandUp,'girl-throwBook': girlThrowBook,
-            'girl-walk': girlWalk,'walk-stop': walkStop,'girl-stand': girlStand,'girl-choose': girlChoose,'girl-weep':girlWeep,
-            'girl-hug':girlHug,'walk-run': walkRun}"></figure>
+            'girl-walk': girlWalk,'girl-stand': girlStand,'girl-choose': girlChoose,'girl-weep':girlWeep,
+            'girl-hug':girlHug}"></figure>
             <figure v-show="christmasBoyHead" class="christmas-boy-head"></figure>
             <figure ref="christmasBoy" class="christmas-boy" :class="{'boy-walk': boyWalk, 'boy-stand': boyStand,
             'boy-unwrapp': boyUnwrapp, 'boy-strip-1': boyStrip1, 'boy-strip-2': boyStrip2, 'boy-strip-3': boyStrip3,
             'boy-hug': boyHug}"> </figure>
-            <div ref="gift" style=" perspective: 1000px;position: absolute;left: 6.1rem;top: 4.8rem;transform: scale3d(.3,.3,.3);">
-              <carouse :spinners="spinners" :show="giftShow" @girlChooseGift="girlChooseGift" ></carouse>
-            </div>
+            <carouse ref="gift" :spinners="spinners" :show="giftShow" @girlChooseGift="girlChooseGift"
+            style=" perspective: 1000px;position: absolute;z-index: 15;left: 6rem;top: 4.2rem;transform: scale3d(.3,.3,.3);" ></carouse>
         </section>
         <!-- 第三幅画面 -->
         <section class="page-c bg-adaptive" :class="{'effect-in': pageC}" ref="pageC">
@@ -48,6 +47,8 @@
                     <div class="window-right hover" :class="{'close': windowClose}"></div>
                 </div>
             </div>
+            <!-- 麋鹿 -->
+            <div ref="deer" class="deer" :class="{'deer-car': deerCar}"></div>
             <!-- 雪花 -->
             <snowflake :config="config"></snowflake>
         </section>
@@ -66,7 +67,6 @@ export default {
         clientHeight: 0
       },
       page: -1,
-      index: 0,
       pageA: false,
       pageB: false,
       pageC: false,
@@ -90,11 +90,9 @@ export default {
       girlThrowBook: false,
       catBook: false,
       girlWalk: false,
-      walkStop: false,
       girlStand: false,
       girlWeep: false,
       girlHug: false,
-      walkRun: false,
       spinners: [{
         imgUrl: '/static/images/carousel/1.png',
         styleObject: {
@@ -123,15 +121,19 @@ export default {
         videoUrl: '/static/images/carousel/3.mp4'
       }],
       giftShow: false,
-      girlChoose: false
+      girlChoose: false,
+      deerCar: false
     }
   },
   methods: {
     Christmas () {
+      // 播放背景音乐
+      this.playMusices()
       this.pageAfun().then(() => {
         this.pageBfun()
       })
       // this.pageBfun()
+      // this.pageCfun()
     },
     async pageAfun () {
       await this.transition(this.$refs.boy, {
@@ -172,27 +174,7 @@ export default {
     },
     async pageBfun () {
       this.$refs.pageB.style.zIndex = '6'
-      await Promise.all([this.boyAction(), this.girlAction()])
-    },
-    async pageCfun () {
-      this.$refs.pageC.style.zIndex = '7'
-      this.windowAuto(this.$refs.pageC)
-      this.$children[1].Snowflake()
-      await this.transition(this.$refs.windowSceneBg, {
-        time: 2000,
-        style: {
-          opacity: '0'
-        }
-      })
-      await this.transition(this.$refs.windowCloseBg, {
-        time: 2000,
-        style: {
-          opacity: '1'
-        }
-      })
-      this.windowClose = true
-    },
-    async boyAction () {
+      // await Promise.all([])
       await this.transition(this.$refs.christmasBoy, {
         time: 4000,
         style: {
@@ -202,84 +184,130 @@ export default {
       // 停止走路
       this.boyWalk = false
       this.boyStand = true
-      // 解开包裹
-      this.boyUnwrapp = true
-      this.boyStand = false
-      this.$refs.christmasBoy.addEventListener('webkitAnimationEnd', () => {
-        return Promise.resolve()
-      })
-      // 脱衣动作
-      await this.sleep(1000)
-      this.boyStrip1 = true
-      this.boyUnwrapp = false
-      this.giftShow = true
-      // 显示礼物界面
-      await this.transition(this.$refs.gift, {
-        time: 2000,
-        style: {
-          left: '6.8rem',
-          top: '1.5rem',
-          perspective: '500px',
-          transform: 'scale3d(.8,.8,.8)'
-        }
-      })
-      await this.sleep(1000)
-      this.boyStrip2 = true
-      this.boyUnwrapp = false
-      await this.sleep(1000)
-      this.boyStrip3 = true
-      this.boyUnwrapp = false
-      // 拥抱
-      await this.sleep(5000)
-      this.boyHug = true
-      this.$refs.christmasBoy.addEventListener('webkitAnimationEnd', () => {
-        this.christmasBoyHead = true
-      })
-    },
-    async girlAction () {
-      await this.sleep(200)
+      // 女孩站起来
       this.girlStandUp = true
-      await this.sleep(300)
+      await this.sleep(200)
+      // 女孩丢书
       this.girlThrowBook = true
+      await this.sleep(300)
       this.catBook = true
       this.girlWalk = true
+      // 女孩走路
       await this.transition(this.$refs.girl, {
         time: 4000,
         style: {
           left: '4.5rem'
         }
       })
-      // 女孩走路
-      this.walkStop = true
+      // 女孩停止走路
       this.girlStandUp = false
       this.girlWalk = false
       this.girlThrowBook = false
       this.girlStand = true
-      // 选择礼物动作
+      // 男孩解开包裹
+      this.boyUnwrapp = true
+      await this.sleep(2500)
+      // 弹出礼物
+      this.giftShow = true
+      await this.$children[0].PageTurn()
+      // 选择礼物
       this.girlChoose = true
+      await this.sleep(2500)
+      // 播放视频
+      await this.$children[0].playVideo()
+      this.girlChoose = false
+      this.boyStand = false
+      this.boyStrip3 = true
+      this.boyUnwrapp = false
+      await this.sleep(1000)
+      // girlChooseGift完成礼物播放
     },
-    async girlChooseGift () {
-      // 泪奔
-      this.girlWeep = true
-      await this.transition(this.$refs.girl, {
-        time: 1000,
+    async pageCfun () {
+      await this.transition(this.$refs.windowSceneBg, {
+        time: 2000,
         style: {
-          left: '7rem'
+          opacity: '0'
         }
       })
-      this.walkStop = true
-      this.girlWeep = false
-      this.girlHug = true
-      this.walkRun = true
-      // this.walkStop = false
+      await this.transition(this.$refs.windowCloseBg, {
+        time: 2000,
+        style: {
+          opacity: '1',
+          scale: 1
+        }
+      })
+      this.$refs.pageC.style.zIndex = '7'
+      this.windowAuto(this.$refs.pageC)
+      this.$children[1].Snowflake()
+      this.windowClose = true
+      await this.sleep(2500)
+      // 麋鹿
+      this.deerCar = true
+      debugger
+      await this.transition(this.$refs.deer, {
+        time: 6000,
+        style: {
+          top: '4.5rem',
+          right: '-3.5rem',
+          scale: '0.8'
+        }
+      })
+      await this.transition(this.$refs.deer, {
+        time: 500,
+        style: {
+          rotateY: '-180',
+          scale: '0.75'
+        }
+      })
+      await this.transition(this.$refs.deer, {
+        time: 12000,
+        style: {
+          top: '1rem',
+          right: '16rem',
+          scale: '0.3'
+        }
+      })
+    },
+    async girlChooseGift (playIndex) {
+      if (playIndex >= this.spinners.length) {
+        // 泪奔
+        this.giftShow = false
+        this.girlWeep = true
+        await this.transition(this.$refs.girl, {
+          time: 1000,
+          style: {
+            left: '7rem'
+          }
+        })
+        this.boyHug = true
+        this.girlHug = true
+        await this.sleep(1000)
+        this.$refs.christmasBoy.addEventListener('webkitAnimationEnd', () => {
+          this.christmasBoyHead = true
+        })
+        this.girlWeep = false
+        await this.transition(this.$refs.pageB, {
+          time: 2000,
+          style: {
+            opacity: 0
+          }
+        })
+        this.pageCfun()
+      } else {
+        await this.$children[0].PageTurn()
+        // 选择礼物
+        this.girlChoose = true
+        await this.sleep(2500)
+        // 播放视频
+        await this.$children[0].playVideo()
+        this.girlChoose = false
+      }
     },
     windowAuto (el) {
-      debugger
       this.config.clientWidth = el.clientWidth
       this.config.clientHeight = el.clientHeight
       const that = this
       window.onresize = () => {
-        debugger
         that.config.clientWidth = el.clientWidth
         that.config.clientHeight = el.clientHeight
       }
@@ -335,11 +363,6 @@ export default {
           })
         })
       }
-    },
-    'walkStop': function () {
-      if (!this.walkStop) {
-        this.pageCfun()
-      }
     }
   },
   components: {
@@ -381,6 +404,7 @@ export default {
     height : 100%;
     background-image: url("/static/images/b/page-b-bg.png");
     position: absolute;
+    opacity: 1;
     z-index: 4;
 }
 .page-c {
@@ -388,6 +412,7 @@ export default {
     height : 100%;
     background-image: url("/static/images/c/page-c-bg.png");
     position: absolute;
+    opacity: 1;
     z-index: 3;
 }
 /**
@@ -1141,5 +1166,36 @@ export default {
     opacity: 0;
     z-index: 500;
 }
-
+.deer {
+  width: 4.5rem;
+  height: 1.5rem;
+  position: absolute;
+  z-index: 1;
+  top: 7.5rem;
+  right: 4rem;
+  -webkit-transform: scale(1);
+          transform: scale(1);
+  background: url('/static/images/c/deer.png') 100% 100%;
+  background-size: 400% 100%;
+}
+.deer-car {
+  -webkit-animation: deerCar 0.75s steps(3,end) infinite;
+  -moz-animation: deerCar 0.75s steps(3,end) infinite;
+}
+@-webkit-keyframes deerCar {
+    0% {
+        background-position: -0% 100%;
+    }
+    100% {
+        background-position: -300% 100%;
+    }
+}
+@-moz-keyframes deerCar {
+    0% {
+        background-position: -0% 100%;
+    }
+    100% {
+        background-position: -300% 100%;
+    }
+}
 </style>

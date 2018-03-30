@@ -1,11 +1,10 @@
 <template>
     <div v-show="show">
         <figure ref="spinner" style="width: 4rem; height:auto; transform: rotateY(-0deg); transform-style: preserve-3d;" >
-            <figure v-for="(item,index) in spinners" :key="index" :style="item.styleObject"
+            <figure v-for="(item,index) in spinners" :key="index" :style="item.styleObject" @click="turnPage(index)"
             style="width:4rem;transform: rotateY(0deg) translateZ(2.5rem) scaleY(.9);position:absolute;">
                 <img :src="item.imgUrl" style="width:100%;height:100%;">
-                <video v-if="index == videoIndex" :class="{'bounceIn': bounceIn,'bounceOut': bounceOut}" ref="videoplay" :src="spinners[videoIndex].videoUrl" preload="auto"
-                class="videoClass" style="width:700%;height:700%;position:absolute;top:-250%;left:-280%;"></video>
+                <video v-if="index == videoIndex" :class="{'videoClass': videoClass,'bounceOut': bounceOut}" ref="videoplay" :src="spinners[videoIndex].videoUrl" preload="auto" class="bounceIn" style="width:100%;height:100%;position:absolute;top:0;left:0;"></video>
             </figure>
         </figure>
     </div>
@@ -16,9 +15,8 @@ export default {
     return {
       rotate: 0,
       videoIndex: -1,
-      bounceIn: false,
-      bounceOut: false,
-      playIndex: 0
+      videoClass: false,
+      bounceOut: false
     }
   },
   props: {
@@ -33,29 +31,31 @@ export default {
     this.rotate = 360 / this.spinners.length
   },
   methods: {
-    async PageTurn () {
-      let angle = this.playIndex * this.rotate + 360
-      window.Velocity(this.$refs.spinner, {rotateY: '-' + angle + 'deg'}, 2000)
-    },
-    playVideo () {
-      this.videoIndex = this.playIndex
-      this.bounceIn = true
-      this.$nextTick(() => {
-        this.$refs.videoplay[0].oncanplay = () => {
-          this.$refs.videoplay[0].play()
-        }
-        this.$refs.videoplay[0].onended = () => {
-          this.$refs.videoplay[0].pause()
-          this.bounceOut = true
-          this.$refs.videoplay[0].addEventListener('webkitAnimationEnd', () => {
-            this.playIndex += 1
-            this.bounceIn = false
-            this.videoIndex = -1
-            this.bounceOut = false
-            this.$emit('girlChooseGift', this.playIndex)
+    turnPage (index) {
+      if (this.videoIndex !== index) {
+        let angle = index * this.rotate
+        this.videoIndex = -1
+        let styleObject = {}
+        styleObject.rotateY = '-' + angle + 'deg'
+        window.Velocity(this.$refs.spinner, styleObject, 2000, () => {
+          this.videoIndex = index
+          this.videoClass = true
+          this.$nextTick(() => {
+            this.$refs.videoplay[0].oncanplay = () => {
+              this.$refs.videoplay[0].play()
+            }
+            this.$refs.videoplay[0].onended = () => {
+              this.$refs.videoplay[0].pause()
+              this.bounceOut = true
+              this.$refs.videoplay[0].addEventListener('webkitAnimationEnd', () => {
+                this.videoIndex = -1
+                this.bounceOut = false
+                this.$emit('girlChooseGift')
+              })
+            }
           })
-        }
-      })
+        })
+      }
     }
   },
   watch: {
