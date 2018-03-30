@@ -2,7 +2,7 @@
 <div>
   <section class="container" ref="pageList">
         <!-- 第一幅画面 -->
-        <section class="page-a bg-adaptive" :class="{'effect-out': pageA}">
+        <section ref="pageA" class="page-a bg-adaptive" :class="{'effect-out': pageA}">
             <!-- 月亮 -->
             <figure class="moon"></figure>
             <!-- 圣诞树 -->
@@ -24,10 +24,11 @@
         <section ref="pageB" class="page-b bg-adaptive" :class="{'effect-out': pageB}">
         <!-- 圣诞男孩 -->
             <!-- 猫 -->
-            <figure class="cat"></figure>
+            <figure class="cat" :class="{'cat-book': catBook}"></figure>
             <!-- 小女孩 -->
             <figure ref="girl" class="girl" :class="{'girl-standUp': girlStandUp,'girl-throwBook': girlThrowBook,
-            'girl-walk': girlWalk,'walk-stop': walkStop,'girl-stand': girlStand,'girl-choose': girlChoose,'girl-weep':girlWeep}"></figure>
+            'girl-walk': girlWalk,'walk-stop': walkStop,'girl-stand': girlStand,'girl-choose': girlChoose,'girl-weep':girlWeep,
+            'girl-hug':girlHug,'walk-run': walkRun}"></figure>
             <figure v-show="christmasBoyHead" class="christmas-boy-head"></figure>
             <figure ref="christmasBoy" class="christmas-boy" :class="{'boy-walk': boyWalk, 'boy-stand': boyStand,
             'boy-unwrapp': boyUnwrapp, 'boy-strip-1': boyStrip1, 'boy-strip-2': boyStrip2, 'boy-strip-3': boyStrip3,
@@ -87,10 +88,13 @@ export default {
       christmasBoyHead: false,
       girlStandUp: false,
       girlThrowBook: false,
+      catBook: false,
       girlWalk: false,
       walkStop: false,
       girlStand: false,
       girlWeep: false,
+      girlHug: false,
+      walkRun: false,
       spinners: [{
         imgUrl: '/static/images/carousel/1.png',
         styleObject: {
@@ -127,7 +131,7 @@ export default {
       this.pageAfun().then(() => {
         this.pageBfun()
       })
-      // this.pageCfun()
+      // this.pageBfun()
     },
     async pageAfun () {
       await this.transition(this.$refs.boy, {
@@ -152,9 +156,19 @@ export default {
           right: '1.2rem'
         }
       })
-      // await this.stopWalk()
       this.boyDeep = false
+      await this.sleep(750)
       this.windowOpen = true
+      await this.sleep(2000)
+      await this.transition(this.$refs.pageA, {
+        time: 5000,
+        style: {
+          opacity: 0,
+          scale: '5',
+          top: '-10rem',
+          left: '-15rem'
+        }
+      })
     },
     async pageBfun () {
       this.$refs.pageB.style.zIndex = '6'
@@ -227,6 +241,7 @@ export default {
       this.girlStandUp = true
       await this.sleep(300)
       this.girlThrowBook = true
+      this.catBook = true
       this.girlWalk = true
       await this.transition(this.$refs.girl, {
         time: 4000,
@@ -243,8 +258,20 @@ export default {
       // 选择礼物动作
       this.girlChoose = true
     },
-    girlChooseGift () {
-      this.walkStop = false
+    async girlChooseGift () {
+      // 泪奔
+      this.girlWeep = true
+      await this.transition(this.$refs.girl, {
+        time: 1000,
+        style: {
+          left: '7rem'
+        }
+      })
+      this.walkStop = true
+      this.girlWeep = false
+      this.girlHug = true
+      this.walkRun = true
+      // this.walkStop = false
     },
     windowAuto (el) {
       debugger
@@ -344,6 +371,10 @@ export default {
     background-image: url("/static/images/a/page-a-bg.png");
     position: absolute;
     z-index: 5;
+    opacity: 1;
+    left: 0rem;
+    top: 0rem;
+    transform: scale3d(1,1,1);
 }
 .container .page-b {
     width  : 100%;
@@ -853,7 +884,21 @@ export default {
     background: url('/static/images/b/girl.png');
     background-size: 2100% 100%;
 }
-
+/*猫*/
+.cat {
+    width: 2rem;
+    height: 1.1rem;
+    position: absolute;
+    z-index: 10;
+    left: 3.2rem;
+    top: 5.4rem;
+    background: url('/static/images/b/cat.png');
+    background-size: 100% 100%;
+}
+.cat.cat-book {
+    background: url('/static/images/b/cat-book.png');
+    background-size: 100% 100%;
+}
 /**
  * 起身
  */
