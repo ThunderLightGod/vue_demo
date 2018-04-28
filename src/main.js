@@ -8,6 +8,8 @@ import 'element-ui/lib/theme-chalk/index.css'
 import Velocity from 'velocity-animate'
 // import $ from 'jquery'
 
+window.Velocity = window.velocity = Velocity
+
 Vue.use(ElementUI)
 Vue.use(Velocity)
 Vue.config.productionTip = false
