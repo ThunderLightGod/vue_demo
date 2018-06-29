@@ -11,7 +11,6 @@ import Velocity from 'velocity-animate'
 window.Velocity = window.velocity = Velocity
 
 Vue.use(ElementUI)
-Vue.use(Velocity)
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
